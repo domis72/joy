@@ -13,7 +13,7 @@ pipeline {
     stage('Build') {
       when {
         not {
-          branch 'master'
+          branch 'joy'
         }
       }
       steps {
@@ -24,7 +24,7 @@ pipeline {
     stage('Test') {
       when {
         not {
-          branch 'master'
+          branch 'joy'
         }
       }
       steps {
@@ -34,7 +34,7 @@ pipeline {
     }
     stage('Deploy to Prod') {
       when {
-        branch 'master'
+        branch 'joy'
       }
       steps {
         snInstallApp(credentialsId: "${CREDENTIALS}", url: "${PRODENV}", appSysId: "${APPSYSID}")
