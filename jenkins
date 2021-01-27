@@ -1,0 +1,44 @@
+pipeline {
+  agent any
+  environment {
+    APPSYSID = 'b52b8c98db86e41013ac972ed3961994'
+    BRANCH = "${BRANCH_NAME}"
+    CREDENTIALS = 'admin'
+    DEVENV = 'https://hsdemo.service-now.com/'
+    TESTENV = 'https://hsdemo.service-now.com/'
+    PRODENV = 'https://hsdemo.service-now.com/'
+    TESTSUITEID = 'b1ae55eedb541410874fccd8139619fb'
+  }
+  stages {
+    stage('Build') {
+      when {
+        not {
+          branch 'master'
+        }
+      }
+      steps {
+        snApplyChanges(appSysId: "${APPSYSID}", branchName: "${BRANCH}", url: "${DEVENV}", credentialsId: "${CREDENTIALS}")
+        snPublishApp(credentialsId: "${CREDENTIALS}", appSysId: "${APPSYSID}", obtainVersionAutomatically: true, url: "${DEVENV}")
+      }
+    }
+    stage('Test') {
+      when {
+        not {
+          branch 'master'
+        }
+      }
+      steps {
+        snInstallApp(credentialsId: "${CREDENTIALS}", url: "${TESTENV}", appSysId: "${APPSYSID}")
+        snRunTestSuite(credentialsId: "${CREDENTIALS}", url: "${TESTENV}", testSuiteSysId: "${TESTSUITEID}", withResults: true)
+      }
+    }
+    stage('Deploy to Prod') {
+      when {
+        branch 'master'
+      }
+      steps {
+        snInstallApp(credentialsId: "${CREDENTIALS}", url: "${PRODENV}", appSysId: "${APPSYSID}")
+      }
+    }
+  }
+}
